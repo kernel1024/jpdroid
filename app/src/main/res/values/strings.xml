@@ -2,7 +2,13 @@
 <resources>
 
     <string name="app_name">JPDroid</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="ac_paste">Paste</string>
+    <string name="ac_translate">Translate</string>
+    <string name="ac_clear">Clear</string>
+    <string name="msg_clipboard_empty">Clipboard is empty</string>
+    <string name="msg_clipboard_incompat">Clipboard contains incompatible data</string>
+
+    <string name="tx_sample">Paste text here from browser or text editor.</string>
 
 </resources>
