@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_title_atlas_params"
+        android:summary="@string/pref_title_atlas_params_s">
+        <EditTextPreference
+            android:key="atlas_retry"
+            android:defaultValue="3"
+            android:inputType="number"
+            android:summary="@string/pref_atlas_retry_s"
+            android:title="@string/pref_atlas_retry"/>
+        <EditTextPreference
+            android:key="atlas_timeout"
+            android:defaultValue="5"
+            android:inputType="number"
+            android:summary="@string/pref_atlas_timeout_s"
+            android:title="@string/pref_atlas_timeout"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

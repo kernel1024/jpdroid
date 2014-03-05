@@ -1,9 +1,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.tscorp.jpdroid.app.MainActivity" >
-    
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
+        <item android:id="@+id/action_paste"
+            android:icon="@android:drawable/ic_menu_edit"
+            android:title="@string/ac_paste"
+            android:showAsAction="always"/>
+
+        <item android:id="@+id/action_clear"
+            android:icon="@android:drawable/ic_menu_delete"
+            android:title="@string/ac_clear"
+            android:showAsAction="always"/>
+
+        <item android:id="@+id/action_translate"
+            android:icon="@android:drawable/ic_menu_upload"
+            android:title="@string/ac_translate"
+            android:showAsAction="always"/>
+
+        <item android:id="@+id/action_settings"
+            android:title="@string/action_settings"
+            android:orderInCategory="100" />
 </menu>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/pref_title_atlas_host"
+        android:summary="@string/pref_title_atlas_host_s">
+        <EditTextPreference
+            android:key="atlas_host"
+            android:summary="@string/pref_atlas_host_s"
+            android:title="@string/pref_atlas_host"/>
+        <EditTextPreference
+            android:key="atlas_port"
+            android:defaultValue="18000"
+            android:inputType="number"
+            android:summary="@string/pref_atlas_port_s"
+            android:title="@string/pref_atlas_port"/>
+        </PreferenceCategory>
+
+</PreferenceScreen>
