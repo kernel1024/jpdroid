@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -94,11 +96,19 @@ public class MainActivity extends Activity {
         mainView.setText(s);
     }
 
+    public Handler atl_handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+        }
+    };
+
     private void faTranslate() {
         String atl_host = prefs.getString("atlas_host","localhost");
         int atl_port = Integer.valueOf(prefs.getString("atlas_port","18000"));
         int atl_retry = Integer.valueOf(prefs.getString("atlas_retry","3"));
         int atl_timeout = Integer.valueOf(prefs.getString("atlas_timeout","5"));
+
 
         String out = atl_host + ":" + Integer.toString(atl_port) + " - "
                 + Integer.toString(atl_retry) + " - " + Integer.toString(atl_timeout);
