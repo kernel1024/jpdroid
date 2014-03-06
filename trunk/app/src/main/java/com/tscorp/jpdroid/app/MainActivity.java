@@ -14,12 +14,18 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends Activity {
 
     private TextView mainView;
+    private ProgressBar mainProgress;
     private SharedPreferences prefs;
 
     @Override
@@ -27,14 +33,16 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        PreferenceManager.setDefaultValues(this,R.xml.preferences,false);
-        PreferenceManager.setDefaultValues(this,R.xml.preferencesopts,false);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.preferencesopts, false);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         ActionBar b = getActionBar();
-        b.setTitle("");
+        if (b != null)
+            b.setTitle("");
 
-        mainView = (TextView)findViewById(R.id.mainTextView);
+        mainView = (TextView) findViewById(R.id.mainTextView);
+        mainProgress = (ProgressBar) findViewById(R.id.mainProgress);
     }
 
     @Override
@@ -56,7 +64,7 @@ public class MainActivity extends Activity {
                 faClear();
                 return true;
             case R.id.action_settings:
-                Intent is = new Intent(MainActivity.this,SettingsActivity.class);
+                Intent is = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(is);
                 return true;
             default:
@@ -66,8 +74,15 @@ public class MainActivity extends Activity {
 
     private void showToast(int msg) {
         Context ctx = getApplicationContext();
-        if (ctx==null) return;
-        Toast t = Toast.makeText(ctx,msg,Toast.LENGTH_SHORT);
+        if (ctx == null) return;
+        Toast t = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
+        t.show();
+    }
+
+    private void showToast(String msg) {
+        Context ctx = getApplicationContext();
+        if (ctx == null) return;
+        Toast t = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
         t.show();
     }
 
@@ -82,9 +97,9 @@ public class MainActivity extends Activity {
             return;
         }
         ClipDescription cd = cb.getPrimaryClipDescription();
-        if ((cd==null) ||
+        if ((cd == null) ||
                 (!cd.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) ||
-                (cb.getPrimaryClip()==null)) {
+                (cb.getPrimaryClip() == null)) {
             showToast(R.string.msg_clipboard_incompat);
             return;
         }
@@ -99,22 +114,55 @@ public class MainActivity extends Activity {
     public Handler atl_handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            if (b == null) return;
+            if (b.containsKey("progress")) {
+                int x = b.getInt("progress");
+                if (x >= 0) {
+                    if (mainProgress.getVisibility() != View.VISIBLE)
+                        mainProgress.setVisibility(View.VISIBLE);
+                    mainProgress.setProgress(x);
+                } else
+                    mainProgress.setVisibility(View.GONE);
+            }
+            if (b.containsKey("text")) {
+                String tx = b.getString("text");
+                if (tx != null && !tx.isEmpty())
+                    mainView.setText(tx);
+            }
+            if (b.containsKey("message")) {
+                showToast(b.getString("message"));
+            }
 
         }
     };
 
     private void faTranslate() {
-        String atl_host = prefs.getString("atlas_host","localhost");
-        int atl_port = Integer.valueOf(prefs.getString("atlas_port","18000"));
-        int atl_retry = Integer.valueOf(prefs.getString("atlas_retry","3"));
-        int atl_timeout = Integer.valueOf(prefs.getString("atlas_timeout","5"));
+        String atl_host;
+        int atl_port, atl_timeout, atl_retry;
+        try {
+            atl_host = prefs.getString("atlas_host", "localhost");
+            atl_port = Integer.valueOf(prefs.getString("atlas_port", "18000"));
+            atl_retry = Integer.valueOf(prefs.getString("atlas_retry", "3"));
+            atl_timeout = Integer.valueOf(prefs.getString("atlas_timeout", "5"));
+        } catch (Exception e) {
+            showToast(e.getMessage());
+            return;
+        }
 
+        CharSequence cs = mainView.getText();
+        if (cs == null || cs.length() == 0) {
+            faClear();
+            return;
+        }
+        String s = cs.toString();
 
-        String out = atl_host + ":" + Integer.toString(atl_port) + " - "
-                + Integer.toString(atl_retry) + " - " + Integer.toString(atl_timeout);
+        ArrayList<String> tx = new ArrayList<String>(Arrays.asList(s.split("\\r?\\n")));
 
-        mainView.setText(out);
-
+        AuxTranslator tran = new AuxTranslator(atl_host, atl_port,
+                atl_timeout, atl_retry, tx, atl_handler);
+        Thread t = new Thread(tran);
+        t.start();
     }
 
 }
