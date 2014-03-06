@@ -3,6 +3,7 @@ package com.tscorp.jpdroid.app;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
+
 import java.util.List;
 
 public class SettingsActivity extends PreferenceActivity {
