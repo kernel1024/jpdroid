@@ -8,10 +8,12 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -43,7 +53,45 @@ public class MainActivity extends Activity {
 
         mainView = (TextView) findViewById(R.id.mainTextView);
         mainProgress = (ProgressBar) findViewById(R.id.mainProgress);
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String mime = intent.getType();
+        String scheme = intent.getScheme();
+        if (Intent.ACTION_VIEW.equals(action) && (mime != null) && (scheme != null) &&
+                (mime.startsWith("text/")) && (scheme.startsWith("file"))) {
+            Uri f_name = intent.getData();
+            if (f_name != null) {
+                String tx = "";
+                File file = new File(f_name.getPath());
+                BufferedReader in = null;
+                try {
+                    if (file.length()>10*1024*1024)
+                        throw new AtlasException("File too big (over 10Mb).");
+
+                    in = new BufferedReader(new InputStreamReader(
+                            new FileInputStream(file),"UTF-8"));
+
+                    String buf;
+                    while ((buf = in.readLine())!=null)
+                        tx += buf + "\r\n";
+                } catch (Exception e) {
+                    showToast("File error: "+e.getMessage());
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException ex){
+                            Log.e("MainActivity","Double exception while closing intent file.",ex);
+                        }
+                    }
+                }
+                if (!tx.isEmpty())
+                    mainView.setText(tx);
+            }
+        }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
