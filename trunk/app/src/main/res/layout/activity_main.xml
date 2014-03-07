@@ -30,12 +30,12 @@
             android:layout_height="fill_parent"
             android:id="@+id/scrollView">
 
-            <TextView
+            <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tx_sample"
+                android:inputType="textMultiLine"
                 android:id="@+id/mainTextView" />
         </ScrollView>
     </RelativeLayout>
-
 </LinearLayout>
