@@ -13,30 +13,31 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.Editable;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends Activity {
 
-    private TextView mainView;
+    private EditText mainView;
     private ProgressBar mainProgress;
     private SharedPreferences prefs;
+    private Object mActionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +52,73 @@ public class MainActivity extends Activity {
         if (b != null)
             b.setTitle("");
 
-        mainView = (TextView) findViewById(R.id.mainTextView);
+        mainView = (EditText) findViewById(R.id.mainTextView);
         mainProgress = (ProgressBar) findViewById(R.id.mainProgress);
 
+        mainView.setCustomSelectionActionModeCallback(mActionModeCallback);
+
+        mainView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mActionMode == null)
+                    return false;
+                mActionMode = MainActivity.this.startActionMode(mActionModeCallback);
+                v.setSelected(true);
+                return true;
+            }
+        });
+
+        checkIntent();
+    }
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = mode.getMenuInflater();
+            if (inflater != null)
+                inflater.inflate(R.menu.context, menu);
+            MenuItem m = menu.findItem(android.R.id.cut);
+            if (m != null) m.setVisible(false);
+            m = menu.findItem(android.R.id.paste);
+            if (m != null) m.setVisible(false);
+            return true;
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            Editable e = mainView.getText();
+            if (e == null || !mainView.hasSelection()) return false;
+            String s = e.toString();
+            if (s == null || s.isEmpty()) return false;
+            s = s.substring(mainView.getSelectionStart(), mainView.getSelectionEnd());
+            if (s == null || s.isEmpty()) return false;
+
+            switch (item.getItemId()) {
+                case R.id.action_sel_search:
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, s);
+                    startActivity(Intent.createChooser(intent, "Search for selection"));
+                    mode.finish();
+                    return true;
+                case R.id.action_sel_translate:
+                    faTranslate(s, true);
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+        }
+    };
+
+    private void checkIntent() {
         Intent intent = getIntent();
         String action = intent.getAction();
         String mime = intent.getType();
@@ -66,23 +131,23 @@ public class MainActivity extends Activity {
                 File file = new File(f_name.getPath());
                 BufferedReader in = null;
                 try {
-                    if (file.length()>10*1024*1024)
+                    if (file.length() > 10 * 1024 * 1024)
                         throw new AtlasException("File too big (over 10Mb).");
 
                     in = new BufferedReader(new InputStreamReader(
-                            new FileInputStream(file),"UTF-8"));
+                            new FileInputStream(file), "UTF-8"));
 
                     String buf;
-                    while ((buf = in.readLine())!=null)
-                        tx += buf + "\r\n";
+                    while ((buf = in.readLine()) != null)
+                        tx += buf + "\n";
                 } catch (Exception e) {
-                    showToast("File error: "+e.getMessage());
+                    showToast("File error: " + e.getMessage());
                 } finally {
                     if (in != null) {
                         try {
                             in.close();
-                        } catch (IOException ex){
-                            Log.e("MainActivity","Double exception while closing intent file.",ex);
+                        } catch (IOException ex) {
+                            Log.e("MainActivity", "Double exception while closing intent file.", ex);
                         }
                     }
                 }
@@ -91,7 +156,6 @@ public class MainActivity extends Activity {
             }
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -106,7 +170,11 @@ public class MainActivity extends Activity {
                 faPaste();
                 return true;
             case R.id.action_translate:
-                faTranslate();
+                CharSequence cs = mainView.getText();
+                if (cs == null || cs.length() == 0)
+                    faClear();
+                else
+                    faTranslate(cs.toString(), false);
                 return true;
             case R.id.action_clear:
                 faClear();
@@ -181,11 +249,18 @@ public class MainActivity extends Activity {
             if (b.containsKey("message")) {
                 showToast(b.getString("message"));
             }
+            if (b.containsKey("toast")) {
+                Context ctx = getApplicationContext();
+                if (ctx == null) return;
+                Toast t = Toast.makeText(ctx, b.getString("toast"), Toast.LENGTH_LONG);
+                t.show();
+            }
 
         }
     };
 
-    private void faTranslate() {
+    private void faTranslate(String s, boolean toastMode) {
+        if (s == null || s.isEmpty()) return;
         String atl_host;
         int atl_port, atl_timeout, atl_retry;
         try {
@@ -198,17 +273,15 @@ public class MainActivity extends Activity {
             return;
         }
 
-        CharSequence cs = mainView.getText();
-        if (cs == null || cs.length() == 0) {
-            faClear();
-            return;
-        }
-        String s = cs.toString();
-
         ArrayList<String> tx = new ArrayList<String>(Arrays.asList(s.split("\\r?\\n")));
 
-        AuxTranslator tran = new AuxTranslator(atl_host, atl_port,
-                atl_timeout, atl_retry, tx, atl_handler);
+        AuxTranslator tran;
+        if (toastMode)
+            tran = new AuxTranslator(atl_host, atl_port,
+                    atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TOAST);
+        else
+            tran = new AuxTranslator(atl_host, atl_port,
+                    atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TEXT);
         Thread t = new Thread(tran);
         t.start();
     }

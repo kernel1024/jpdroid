@@ -9,20 +9,28 @@ import java.util.ArrayList;
 
 class AuxTranslator implements Runnable {
 
+    public enum OutputMode {
+        TEXT,
+        TOAST
+    }
+
     private final int atl_timeout;
     private final int atl_retries;
     private final int atl_port;
     private final String atl_host;
+    private final OutputMode out_mode;
     private ArrayList<String> atl_text;
     private Handler ui_handler;
 
-    AuxTranslator(String hostname, int port, int timeout, int retries, ArrayList<String> text, Handler uiHandler) {
+    AuxTranslator(String hostname, int port, int timeout, int retries, ArrayList<String> text,
+                  Handler uiHandler, OutputMode outMode) {
         atl_host = hostname;
         atl_port = port;
         atl_timeout = timeout;
         atl_retries = retries;
         atl_text = new ArrayList<String>(text);
         ui_handler = uiHandler;
+        out_mode = outMode;
     }
 
     private void sendProgressMsg(int progress) {
@@ -49,10 +57,20 @@ class AuxTranslator implements Runnable {
         ui_handler.sendMessage(msg);
     }
 
+    private void sendReadyTextToast(String text) {
+        Message msg = ui_handler.obtainMessage();
+        Bundle b = new Bundle();
+        b.putString("toast", text);
+        msg.setData(b);
+        ui_handler.sendMessage(msg);
+    }
+
     @Override
     public void run() {
         String res = "";
         String a_msg = "";
+        String lastTran = "";
+        boolean fTran = (out_mode == OutputMode.TOAST);
 
         AtlasTranslator tran = new AtlasTranslator(atl_timeout);
         boolean ok_conn = false;
@@ -64,7 +82,7 @@ class AuxTranslator implements Runnable {
                     ti = tran.initTran(atl_host, atl_port);
                 } catch (Exception e) {
                     c_msg = e.getMessage();
-                    Thread.currentThread().wait(atl_timeout * 1000);
+                    Thread.sleep(atl_timeout * 1000);
                 }
                 if (!ti) continue;
                 ok_conn = true;
@@ -76,13 +94,19 @@ class AuxTranslator implements Runnable {
                 throw new AtlasException(c_msg);
             }
 
-            sendProgressMsg(0);
+            if (!fTran)
+                sendProgressMsg(0);
+            int idx = 0;
             for (String txs : atl_text) {
                 String s = tran.tranString(txs);
-                res += txs + "\r\n" + s + "\r\n\r\n";
-                sendProgressMsg(100 * atl_text.indexOf(txs) / atl_text.size());
+                lastTran = s;
+                res += txs + "\n" + s + "\n\n";
+                idx++;
+                if (!fTran)
+                    sendProgressMsg(100 * idx / atl_text.size());
             }
-            sendProgressMsg(100);
+            if (!fTran)
+                sendProgressMsg(100);
             tran.doneTran();
 
         } catch (Exception e) {
@@ -95,11 +119,15 @@ class AuxTranslator implements Runnable {
         }
         if (!a_msg.isEmpty())
             sendAlertMsg(a_msg);
-        else if (!res.isEmpty())
-            sendReadyText(res);
-        else
+        else if (!res.isEmpty()) {
+            if (fTran)
+                sendReadyTextToast(lastTran);
+            else
+                sendReadyText(res);
+        } else
             sendAlertMsg("Empty result");
 
-        sendProgressMsg(-1);
+        if (!fTran)
+            sendProgressMsg(-1);
     }
 }
