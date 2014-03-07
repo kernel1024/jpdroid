@@ -9,6 +9,9 @@ import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+
+// Object not locked by thread before wait()......
+
 public class AtlasTranslator {
     enum ATTranslateMode {
         AutoTran,
