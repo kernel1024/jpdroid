@@ -214,7 +214,9 @@ public class MainActivity extends Activity {
         }
         ClipDescription cd = cb.getPrimaryClipDescription();
         if ((cd == null) ||
-                (!cd.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) ||
+                (
+                        (!cd.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) &&
+                        (!cd.hasMimeType(ClipDescription.MIMETYPE_TEXT_HTML))) ||
                 (cb.getPrimaryClip() == null)) {
             showToast(R.string.msg_clipboard_incompat);
             return;
@@ -222,7 +224,7 @@ public class MainActivity extends Activity {
 
         ClipData cdt = cb.getPrimaryClip();
         ClipData.Item ci = cdt.getItemAt(0);
-        CharSequence s = ci.getText();
+        CharSequence s = ci.coerceToText(this);
 
         mainView.setText(s);
     }
