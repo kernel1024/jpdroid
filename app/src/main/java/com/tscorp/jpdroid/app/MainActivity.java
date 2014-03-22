@@ -183,6 +183,9 @@ public class MainActivity extends Activity {
                 Intent is = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(is);
                 return true;
+            case R.id.action_exit:
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
