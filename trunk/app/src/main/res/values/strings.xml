@@ -12,6 +12,7 @@
     <string name="ac_cut">Cut</string>
     <string name="ac_copy">Copy</string>
     <string name="ac_select_all">Select all</string>
+    <string name="ac_exit">Exit</string>
     <string name="msg_clipboard_empty">Clipboard is empty</string>
     <string name="msg_clipboard_incompat">Clipboard contains incompatible data</string>
 
