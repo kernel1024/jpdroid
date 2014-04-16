@@ -38,10 +38,12 @@ public class MainActivity extends Activity {
     private ProgressBar mainProgress;
     private SharedPreferences prefs;
     private Object mActionMode;
+    private AuxTranslator mainTranslator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainTranslator = null;
         setContentView(R.layout.activity_main);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -183,6 +185,10 @@ public class MainActivity extends Activity {
                 Intent is = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(is);
                 return true;
+            case R.id.action_stop:
+                if (mainTranslator!=null)
+                    mainTranslator.breakTranslation();
+                return true;
             case R.id.action_exit:
                 finish();
                 return true;
@@ -260,12 +266,18 @@ public class MainActivity extends Activity {
                 Toast t = Toast.makeText(ctx, b.getString("toast"), Toast.LENGTH_LONG);
                 t.show();
             }
+            if (b.containsKey("cleanup"))
+                mainTranslator = null;
 
         }
     };
 
     private void faTranslate(String s, boolean toastMode) {
         if (s == null || s.isEmpty()) return;
+        if (mainTranslator!=null) {
+            showToast("Atlas translator is busy.");
+            return;
+        }
         String atl_host;
         int atl_port, atl_timeout, atl_retry;
         try {
@@ -280,15 +292,18 @@ public class MainActivity extends Activity {
 
         ArrayList<String> tx = new ArrayList<String>(Arrays.asList(s.split("\\r?\\n")));
 
-        AuxTranslator tran;
-        if (toastMode)
+        if (toastMode) {
+            AuxTranslator tran;
             tran = new AuxTranslator(atl_host, atl_port,
                     atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TOAST);
-        else
-            tran = new AuxTranslator(atl_host, atl_port,
+            Thread t = new Thread(tran);
+            t.start();
+        } else {
+            mainTranslator = new AuxTranslator(atl_host, atl_port,
                     atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TEXT);
-        Thread t = new Thread(tran);
-        t.start();
+            Thread t = new Thread(mainTranslator);
+            t.start();
+        }
     }
 
 }

@@ -31,6 +31,13 @@ public class AtlasTranslator {
         sock = null;
     }
 
+    boolean isConnected() {
+        if (sock!=null)
+            return sock.isConnected();
+        else
+            return false;
+    }
+
     boolean initTran(String host, int port)
             throws IOException, AtlasException {
         return initTran(host, port, ATTranslateMode.AutoTran);
@@ -126,10 +133,12 @@ public class AtlasTranslator {
             s_out.flush();
             String buf = s_in.readLine();
             if (buf == null || buf.trim().isEmpty() || !buf.trim().equals("OK")) {
-                sock.close();
+                if (!sock.isConnected())
+                    sock.close();
                 throw new AtlasException("ATLAS: finalization error");
             }
         }
-        sock.close();
+        if (!sock.isConnected())
+            sock.close();
     }
 }
