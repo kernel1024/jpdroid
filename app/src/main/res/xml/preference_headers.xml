@@ -10,4 +10,9 @@
         android:title="@string/pref_title_atlas_params"
         android:summary="@string/pref_title_atlas_params_s"/>
 
+    <header
+        android:id="@+id/enter_cert"
+        android:title="@string/pref_atlas_cert"
+        android:summary="@string/pref_atlas_cert_s" />
+
 </preference-headers>

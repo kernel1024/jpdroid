@@ -3,7 +3,6 @@ package com.tscorp.jpdroid.app;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -18,18 +17,22 @@ class AuxTranslator implements Runnable {
     private final int atl_retries;
     private final int atl_port;
     private final String atl_host;
+    private final String atl_token;
+    private final String atl_cert;
     private final OutputMode out_mode;
     private ArrayList<String> atl_text;
     private Handler ui_handler;
     private boolean stopTranslation;
 
-    AuxTranslator(String hostname, int port, int timeout, int retries, ArrayList<String> text,
-                  Handler uiHandler, OutputMode outMode) {
+    AuxTranslator(String hostname, int port, int timeout, int retries, String token, String cert,
+                  ArrayList<String> text, Handler uiHandler, OutputMode outMode) {
         atl_host = hostname;
         atl_port = port;
         atl_timeout = timeout;
         atl_retries = retries;
         atl_text = new ArrayList<String>(text);
+        atl_token = token;
+        atl_cert = cert;
         ui_handler = uiHandler;
         out_mode = outMode;
     }
@@ -87,7 +90,7 @@ class AuxTranslator implements Runnable {
                 try {
                     if (tran.isConnected())
                         tran.doneTran();
-                    if (tran.initTran(atl_host, atl_port)) {
+                    if (tran.initTran(atl_host, atl_port, atl_token, atl_cert)) {
                         if (!simpleTran)
                             sendProgressMsg(0);
                         int idx = 0;

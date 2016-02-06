@@ -5,6 +5,10 @@
     <string name="pref_atlas_host_s">ATLAS server hostname</string>
     <string name="pref_atlas_port">Port</string>
     <string name="pref_atlas_port_s">ATLAS server port</string>
+    <string name="pref_atlas_cert">SSL certificate</string>
+    <string name="pref_atlas_cert_s">Self-signed certificate (if needed)</string>
+    <string name="pref_atlas_token">Auth token</string>
+    <string name="pref_atlas_token_s">ATLAS server auth token</string>
     <string name="pref_atlas_retry">Retry count</string>
     <string name="pref_atlas_retry_s">ATLAS connection retries</string>
     <string name="pref_atlas_timeout">Connection timeout</string>

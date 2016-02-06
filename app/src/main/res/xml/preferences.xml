@@ -14,6 +14,10 @@
             android:inputType="number"
             android:summary="@string/pref_atlas_port_s"
             android:title="@string/pref_atlas_port"/>
+        <EditTextPreference
+            android:key="atlas_token"
+            android:summary="@string/pref_atlas_token_s"
+            android:title="@string/pref_atlas_token" />
         </PreferenceCategory>
 
 </PreferenceScreen>

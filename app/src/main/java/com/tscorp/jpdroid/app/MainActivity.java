@@ -94,9 +94,9 @@ public class MainActivity extends Activity {
             Editable e = mainView.getText();
             if (e == null || !mainView.hasSelection()) return false;
             String s = e.toString();
-            if (s == null || s.isEmpty()) return false;
+            if (s.isEmpty()) return false;
             s = s.substring(mainView.getSelectionStart(), mainView.getSelectionEnd());
-            if (s == null || s.isEmpty()) return false;
+            if (s.isEmpty()) return false;
 
             switch (item.getItemId()) {
                 case R.id.action_sel_search:
@@ -149,7 +149,7 @@ public class MainActivity extends Activity {
                         try {
                             in.close();
                         } catch (IOException ex) {
-                            Log.e("MainActivity", "Double exception while closing intent file.", ex);
+                            Log.e("JPDroid", "Double exception while closing intent file.", ex);
                         }
                     }
                 }
@@ -197,14 +197,15 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void showToast(int msg) {
+    public void showToast(int msg) {
         Context ctx = getApplicationContext();
         if (ctx == null) return;
         Toast t = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
         t.show();
     }
 
-    private void showToast(String msg) {
+    public void showToast(String msg) {
+        Log.d("JPDroid", msg);
         Context ctx = getApplicationContext();
         if (ctx == null) return;
         Toast t = Toast.makeText(ctx, msg, Toast.LENGTH_SHORT);
@@ -278,13 +279,17 @@ public class MainActivity extends Activity {
             showToast("Atlas translator is busy.");
             return;
         }
-        String atl_host;
+        String atl_host, atl_token, atl_cert;
         int atl_port, atl_timeout, atl_retry;
         try {
             atl_host = prefs.getString("atlas_host", "localhost");
             atl_port = Integer.valueOf(prefs.getString("atlas_port", "18000"));
             atl_retry = Integer.valueOf(prefs.getString("atlas_retry", "3"));
             atl_timeout = Integer.valueOf(prefs.getString("atlas_timeout", "5"));
+            atl_token = prefs.getString("atlas_token", "");
+
+            CertificateLoader cLoader = new CertificateLoader(this);
+            atl_cert = cLoader.getCertificate();
         } catch (Exception e) {
             showToast(e.getMessage());
             return;
@@ -295,12 +300,12 @@ public class MainActivity extends Activity {
         if (toastMode) {
             AuxTranslator tran;
             tran = new AuxTranslator(atl_host, atl_port,
-                    atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TOAST);
+                    atl_timeout, atl_retry, atl_token, atl_cert, tx, atl_handler, AuxTranslator.OutputMode.TOAST);
             Thread t = new Thread(tran);
             t.start();
         } else {
             mainTranslator = new AuxTranslator(atl_host, atl_port,
-                    atl_timeout, atl_retry, tx, atl_handler, AuxTranslator.OutputMode.TEXT);
+                    atl_timeout, atl_retry, atl_token, atl_cert, tx, atl_handler, AuxTranslator.OutputMode.TEXT);
             Thread t = new Thread(mainTranslator);
             t.start();
         }

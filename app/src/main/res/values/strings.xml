@@ -18,5 +18,8 @@
     <string name="msg_clipboard_incompat">Clipboard contains incompatible data</string>
 
     <string name="tx_sample">Paste text here from browser or text editor.</string>
+    <string name="lbl_certhere">Paste server\'s certificate content here</string>
+    <string name="lbl_SaveCert">Save and return</string>
+    <string name="lbl_ClearCert">Clear</string>
 
 </resources>
