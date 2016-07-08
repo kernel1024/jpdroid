@@ -16,6 +16,11 @@
             android:inputType="number"
             android:summary="@string/pref_atlas_timeout_s"
             android:title="@string/pref_atlas_timeout"/>
+        <SwitchPreference
+            android:key="translate_subs"
+            android:defaultValue="false"
+            android:summary="@string/pref_atlas_trans_subs_s"
+            android:title="@string/pref_atlas_trans_subs" />
     </PreferenceCategory>
 
 </PreferenceScreen>

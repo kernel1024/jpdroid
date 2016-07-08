@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 class AuxTranslator implements Runnable {
 
-    public enum OutputMode {
+    enum OutputMode {
         TEXT,
         TOAST
     }
@@ -23,9 +23,11 @@ class AuxTranslator implements Runnable {
     private ArrayList<String> atl_text;
     private Handler ui_handler;
     private boolean stopTranslation;
+    private boolean translateSubSentences;
 
-    AuxTranslator(String hostname, int port, int timeout, int retries, String token, String cert,
-                  ArrayList<String> text, Handler uiHandler, OutputMode outMode) {
+    AuxTranslator(String hostname, int port, int timeout, int retries, boolean transSubSentences,
+                  String token, String cert, ArrayList<String> text, Handler uiHandler,
+                  OutputMode outMode) {
         atl_host = hostname;
         atl_port = port;
         atl_timeout = timeout;
@@ -34,6 +36,7 @@ class AuxTranslator implements Runnable {
         atl_token = token;
         atl_cert = cert;
         ui_handler = uiHandler;
+        translateSubSentences = transSubSentences;
         out_mode = outMode;
     }
 
@@ -69,7 +72,7 @@ class AuxTranslator implements Runnable {
         sendMessageWithString("cleanup", "");
     }
 
-    public void breakTranslation() {
+    void breakTranslation() {
         stopTranslation = true;
     }
 
@@ -96,7 +99,32 @@ class AuxTranslator implements Runnable {
                         int idx = 0;
                         for (String txs : atl_text) {
                             if (stopTranslation) break;
-                            String s = tran.tranString(txs);
+                            String s = "";
+                            if (translateSubSentences) {
+                                String tacc = "";
+                                for (int j = 0; j < txs.length(); j++) {
+                                    char sc = txs.charAt(j);
+                                    if (Character.isLetter(sc))
+                                        tacc += sc;
+                                    if (!Character.isLetter(sc) || (j == (txs.length() - 1))) {
+                                        if (!tacc.isEmpty()) {
+                                            if (Character.isLetter(sc))
+                                                s += tran.tranString(tacc);
+                                            else {
+                                                if ((int)sc == 0x3f || (int)sc == 0xff1f) {
+                                                    tacc += sc;
+                                                    s += tran.tranString(tacc);
+                                                } else
+                                                    s += tran.tranString(tacc) + sc;
+                                            }
+                                            tacc = "";
+                                        } else
+                                            s += sc;
+                                    }
+                                }
+                            } else {
+                                s = tran.tranString(txs);
+                            }
                             lastTran = s;
                             res += txs + "\n" + s + "\n\n";
                             idx++;

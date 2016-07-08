@@ -281,12 +281,14 @@ public class MainActivity extends Activity {
         }
         String atl_host, atl_token, atl_cert;
         int atl_port, atl_timeout, atl_retry;
+        boolean transSubSentences;
         try {
             atl_host = prefs.getString("atlas_host", "localhost");
             atl_port = Integer.valueOf(prefs.getString("atlas_port", "18000"));
             atl_retry = Integer.valueOf(prefs.getString("atlas_retry", "3"));
             atl_timeout = Integer.valueOf(prefs.getString("atlas_timeout", "5"));
             atl_token = prefs.getString("atlas_token", "");
+            transSubSentences = prefs.getBoolean("translate_subs",false);
 
             CertificateLoader cLoader = new CertificateLoader(this);
             atl_cert = cLoader.getCertificate();
@@ -300,12 +302,14 @@ public class MainActivity extends Activity {
         if (toastMode) {
             AuxTranslator tran;
             tran = new AuxTranslator(atl_host, atl_port,
-                    atl_timeout, atl_retry, atl_token, atl_cert, tx, atl_handler, AuxTranslator.OutputMode.TOAST);
+                    atl_timeout, atl_retry, transSubSentences, atl_token, atl_cert, tx, atl_handler,
+                    AuxTranslator.OutputMode.TOAST);
             Thread t = new Thread(tran);
             t.start();
         } else {
             mainTranslator = new AuxTranslator(atl_host, atl_port,
-                    atl_timeout, atl_retry, atl_token, atl_cert, tx, atl_handler, AuxTranslator.OutputMode.TEXT);
+                    atl_timeout, atl_retry, transSubSentences, atl_token, atl_cert, tx, atl_handler,
+                    AuxTranslator.OutputMode.TEXT);
             Thread t = new Thread(mainTranslator);
             t.start();
         }

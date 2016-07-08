@@ -23,7 +23,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
 
-public class AtlasTranslator {
+class AtlasTranslator {
     enum ATTranslateMode {
         AutoTran,
         EngToJpnTran,
@@ -54,19 +54,16 @@ public class AtlasTranslator {
         return initTran(host, port, ATTranslateMode.AutoTran, token, cert);
     }
 
-    SSLSocketFactory createSSLFactory(String cert)
+    private SSLSocketFactory createSSLFactory(String cert)
             throws CertificateException, KeyStoreException, NoSuchAlgorithmException,
             KeyManagementException, IOException {
         if (cert.isEmpty() || cert.contains("ERROR"))
             return (SSLSocketFactory) SSLSocketFactory.getDefault();
 
-        SSLSocketFactory sf = null;
         InputStream caInput = new ByteArrayInputStream(cert.getBytes());
 
         // Load CAs from an InputStream
-        // (could be from a resource or ByteArrayInputStream or ...
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        // From https://www.washington.edu/itconnect/security/ca/load-der.crt
         Certificate ca = cf.generateCertificate(caInput);
 
         // Create a KeyStore containing our trusted CAs

@@ -6,12 +6,8 @@
     <string name="ac_paste">Paste</string>
     <string name="ac_translate">Translate</string>
     <string name="ac_clear">Clear</string>
-    <string name="ac_save">Save to file</string>
     <string name="ac_sel_search">Search</string>
     <string name="ac_sel_translate">Translate</string>
-    <string name="ac_cut">Cut</string>
-    <string name="ac_copy">Copy</string>
-    <string name="ac_select_all">Select all</string>
     <string name="ac_stop">Stop</string>
     <string name="ac_exit">Exit</string>
     <string name="msg_clipboard_empty">Clipboard is empty</string>

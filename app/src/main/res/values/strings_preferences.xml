@@ -15,6 +15,8 @@
     <string name="pref_atlas_timeout_s">ATLAS cycling connection timeout</string>
     <string name="pref_title_atlas_host">ATLAS server</string>
     <string name="pref_title_atlas_host_s">ATLAS TCP server location</string>
-    <string name="pref_title_atlas_params">ATLAS connection options</string>
+    <string name="pref_title_atlas_params">ATLAS options</string>
     <string name="pref_title_atlas_params_s">ATLAS TCP server connection settings</string>
+    <string name="pref_atlas_trans_subs">Translate subsentences</string>
+    <string name="pref_atlas_trans_subs_s">Translate subsentences separately</string>
 </resources>
