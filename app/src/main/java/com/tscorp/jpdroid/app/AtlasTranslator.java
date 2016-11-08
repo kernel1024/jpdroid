@@ -126,7 +126,7 @@ class AtlasTranslator {
 
     String tranString(String src)
             throws IOException, AtlasException {
-        if (!sock.isConnected()) return "ERROR: Socket not opened";
+        if ((sock == null) || !sock.isConnected()) return "ERROR: Socket not opened";
 
         PrintWriter s_out = new PrintWriter(sock.getOutputStream());
         BufferedReader s_in = new BufferedReader(new InputStreamReader(sock.getInputStream(), "ISO-8859-1"));
@@ -166,7 +166,7 @@ class AtlasTranslator {
 
     void doneTran(boolean lazyClose)
             throws IOException, AtlasException {
-        if (!sock.isConnected()) return;
+        if ((sock == null) || !sock.isConnected()) return;
 
         if (!lazyClose) {
             // FIN command and response
@@ -177,12 +177,12 @@ class AtlasTranslator {
             s_out.flush();
             String buf = s_in.readLine();
             if (buf == null || buf.trim().isEmpty() || !buf.trim().equals("OK")) {
-                if (!sock.isConnected())
+                if (sock.isConnected())
                     sock.close();
                 throw new AtlasException("ATLAS: finalization error");
             }
         }
-        if (!sock.isConnected())
+        if (sock.isConnected())
             sock.close();
     }
 }
